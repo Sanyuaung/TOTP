@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Container,
@@ -18,6 +18,8 @@ import {
   Divider,
   Badge,
   Tabs,
+  Loader,
+  Center,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Header } from "@/components/Header";
@@ -33,7 +35,8 @@ import {
   IconX,
 } from "@tabler/icons-react";
 
-export default function ProfilePage() {
+// Create a wrapper component that uses useSearchParams
+function ProfileContent() {
   const navigate = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "manage-profile";
@@ -649,5 +652,31 @@ export default function ProfilePage() {
         </Stack>
       </Modal>
     </Container>
+  );
+}
+
+// Loading component for Suspense fallback
+function ProfileLoading() {
+  return (
+    <Container size={800} py={40}>
+      <Header
+        showBackButton={true}
+        backTo="/dashboard"
+        title="Profile Settings"
+        subtitle="Manage your account and security preferences"
+      />
+      <Center style={{ height: "400px" }}>
+        <Loader size="lg" />
+      </Center>
+    </Container>
+  );
+}
+
+// Main component with Suspense boundary
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<ProfileLoading />}>
+      <ProfileContent />
+    </Suspense>
   );
 }
