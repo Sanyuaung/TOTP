@@ -102,7 +102,7 @@ export default function OtpPage() {
           color: "red",
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       notifications.show({
         title: "Error",
         message: "Network error. Please try again.",

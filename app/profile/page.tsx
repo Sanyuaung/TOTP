@@ -18,19 +18,17 @@ import {
   Divider,
   Badge,
   Tabs,
-  Card,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
 import { Header } from "@/components/Header";
+import { showNotification } from "@/lib/notifications";
+import { useTwoFactorStatus } from "@/lib/hooks";
 import {
   IconUser,
   IconLock,
   IconShield,
-  IconArrowLeft,
   IconMail,
   IconKey,
-  IconSettings,
   IconCheck,
   IconX,
 } from "@tabler/icons-react";
@@ -40,7 +38,7 @@ export default function ProfilePage() {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "manage-profile";
   const [loading, setLoading] = useState(false);
-  const [twoFactorStatus, setTwoFactorStatus] = useState<any>(null);
+  const { status: twoFactorStatus, refetch } = useTwoFactorStatus();
   const [setupModal, setSetupModal] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [secret, setSecret] = useState("");
@@ -75,7 +73,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     fetchProfile();
-    fetchTwoFactorStatus();
   }, []);
 
   const fetchProfile = async () => {
@@ -101,26 +98,6 @@ export default function ProfilePage() {
     }
   };
 
-  const fetchTwoFactorStatus = async () => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return;
-
-    try {
-      const response = await fetch("/api/two-factor/status", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTwoFactorStatus(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch 2FA status");
-    }
-  };
-
   const handleUpdateProfile = async (values: typeof profileForm.values) => {
     setLoading(true);
     const token = localStorage.getItem("accessToken");
@@ -137,25 +114,17 @@ export default function ProfilePage() {
       });
 
       if (response.ok) {
-        notifications.show({
-          title: "Success",
-          message: "Profile updated successfully",
-          color: "green",
-        });
+        showNotification("Success", "Profile updated successfully", "success");
       } else {
         const data = await response.json();
-        notifications.show({
-          title: "Error",
-          message: data.error || "Failed to update profile",
-          color: "red",
-        });
+        showNotification(
+          "Error",
+          data.error || "Failed to update profile",
+          "error"
+        );
       }
     } catch (error: any) {
-      notifications.show({
-        title: "Error",
-        message: "Network error",
-        color: "red",
-      });
+      showNotification("Error", "Network error", "error");
     } finally {
       setLoading(false);
     }
@@ -180,26 +149,18 @@ export default function ProfilePage() {
       });
 
       if (response.ok) {
-        notifications.show({
-          title: "Success",
-          message: "Password changed successfully",
-          color: "green",
-        });
+        showNotification("Success", "Password changed successfully", "success");
         passwordForm.reset();
       } else {
         const data = await response.json();
-        notifications.show({
-          title: "Error",
-          message: data.error || "Failed to change password",
-          color: "red",
-        });
+        showNotification(
+          "Error",
+          data.error || "Failed to change password",
+          "error"
+        );
       }
     } catch (error: any) {
-      notifications.show({
-        title: "Error",
-        message: "Network error",
-        color: "red",
-      });
+      showNotification("Error", "Network error", "error");
     } finally {
       setLoading(false);
     }
@@ -230,27 +191,20 @@ export default function ProfilePage() {
         }
 
         setSetupModal(true);
-        notifications.show({
-          title: "Success",
-          message:
-            selectedMethod === "EMAIL"
-              ? "OTP sent to your email. Please verify to enable 2FA."
-              : "Scan the QR code with your authenticator app",
-          color: "blue",
-        });
+        const message =
+          selectedMethod === "EMAIL"
+            ? "OTP sent to your email. Please verify to enable 2FA."
+            : "Scan the QR code with your authenticator app";
+        showNotification("Success", message, "info");
       } else {
-        notifications.show({
-          title: "Error",
-          message: data.error || "Failed to enable 2FA",
-          color: "red",
-        });
+        showNotification(
+          "Error",
+          data.error || "Failed to enable 2FA",
+          "error"
+        );
       }
     } catch (error: any) {
-      notifications.show({
-        title: "Error",
-        message: "Network error",
-        color: "red",
-      });
+      showNotification("Error", "Network error", "error");
     } finally {
       setLoading(false);
     }
@@ -274,27 +228,19 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (response.ok) {
-        notifications.show({
-          title: "Success",
-          message: "Two-factor authentication enabled successfully",
-          color: "green",
-        });
+        showNotification(
+          "Success",
+          "Two-factor authentication enabled successfully",
+          "success"
+        );
         setSetupModal(false);
         setVerifyCode("");
-        fetchTwoFactorStatus();
+        refetch();
       } else {
-        notifications.show({
-          title: "Error",
-          message: data.error || "Invalid code",
-          color: "red",
-        });
+        showNotification("Error", data.error || "Invalid code", "error");
       }
     } catch (error: any) {
-      notifications.show({
-        title: "Error",
-        message: "Network error",
-        color: "red",
-      });
+      showNotification("Error", "Network error", "error");
     } finally {
       setLoading(false);
     }
@@ -324,27 +270,23 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (response.ok) {
-        notifications.show({
-          title: "Success",
-          message: "Two-factor authentication disabled",
-          color: "green",
-        });
+        showNotification(
+          "Success",
+          "Two-factor authentication disabled",
+          "success"
+        );
         setDisableModal(false);
         setDisablePassword("");
-        fetchTwoFactorStatus();
+        refetch();
       } else {
-        notifications.show({
-          title: "Error",
-          message: data.error || "Failed to disable 2FA",
-          color: "red",
-        });
+        showNotification(
+          "Error",
+          data.error || "Failed to disable 2FA",
+          "error"
+        );
       }
     } catch (error: any) {
-      notifications.show({
-        title: "Error",
-        message: "Network error",
-        color: "red",
-      });
+      showNotification("Error", "Network error", "error");
     } finally {
       setLoading(false);
     }

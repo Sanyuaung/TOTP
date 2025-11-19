@@ -5,52 +5,45 @@ import { useRouter } from "next/navigation";
 import {
   Container,
   Paper,
-  Title,
   Text,
   Button,
   Group,
   Stack,
   Card,
   Badge,
-  Avatar,
   Grid,
   ThemeIcon,
+  Title,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { useAuth } from "@/lib/auth-context";
 import { Header } from "@/components/Header";
+import { LoadingCenter } from "@/components/LoadingCenter";
 import { getAvatarColors } from "@/lib/avatar-colors";
+import { useTwoFactorStatus } from "@/lib/hooks";
 import {
-  IconLogout,
   IconUser,
   IconShield,
-  IconSettings,
   IconShieldCheck,
   IconMail,
   IconDeviceMobile,
   IconKey,
   IconLock,
-  IconUserCheck,
 } from "@tabler/icons-react";
 
-interface TwoFactorStatus {
-  isEnabled: boolean;
-  method: string | null;
-}
-
 export default function DashboardPage() {
-  const [twoFactorStatus, setTwoFactorStatus] =
-    useState<TwoFactorStatus | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { user, logout, setAuthData } = useAuth();
+  const { user, setAuthData } = useAuth();
+  const {
+    status: twoFactorStatus,
+    loading,
+    refetch: refetchTwoFactor,
+  } = useTwoFactorStatus();
 
   const userDisplayName = user?.name || user?.email || "User";
   const avatarColors = getAvatarColors(userDisplayName);
 
   useEffect(() => {
     fetchUserData();
-    fetchTwoFactorStatus();
   }, []);
 
   const fetchUserData = async () => {
@@ -63,42 +56,15 @@ export default function DashboardPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Update the user data in auth context with fresh data
         setAuthData(localStorage.getItem("accessToken") || "", data);
-        console.log("User data updated in dashboard:", data);
-      } else {
-        console.error("Failed to fetch user data from dashboard");
       }
     } catch (error) {
       console.error("Error fetching user data from dashboard:", error);
     }
   };
 
-  const fetchTwoFactorStatus = async () => {
-    try {
-      const response = await fetch("/api/two-factor/status", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTwoFactorStatus(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch 2FA status:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Text>Loading...</Text>
-      </div>
-    );
+    return <LoadingCenter />;
   }
 
   return (

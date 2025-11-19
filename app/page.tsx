@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Loader, Center } from "@mantine/core";
+import { LoadingCenter } from "@/components/LoadingCenter";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -19,9 +19,5 @@ export default function Home() {
     }
   }, [user, loading, router]);
 
-  return (
-    <Center h="100vh">
-      <Loader size="lg" />
-    </Center>
-  );
+  return <LoadingCenter />;
 }

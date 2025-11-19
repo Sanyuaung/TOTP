@@ -3,28 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Container,
-  Paper,
-  Title,
   TextInput,
   PasswordInput,
   Button,
-  Text,
   Anchor,
   Stack,
   Group,
-  ThemeIcon,
-  Box,
+  Text,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { useAuth } from "@/lib/auth-context";
 import { Header } from "@/components/Header";
-import {
-  IconLogin,
-  IconMail,
-  IconLock,
-  IconUserPlus,
-} from "@tabler/icons-react";
+import { AuthFormContainer } from "@/components/AuthFormContainer";
+import { showNotification, notificationMessages } from "@/lib/notifications";
+import { IconLogin, IconMail, IconLock } from "@tabler/icons-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -41,59 +32,27 @@ export default function LoginPage() {
       const result = await login(email, password);
 
       if (result.requiresOtp) {
-        // Store temp token and redirect to OTP page
         localStorage.setItem("tempToken", result.tempToken);
         localStorage.setItem("otpMethod", result.method);
-        notifications.show({
-          title: "2FA Required",
-          message: `Please enter your ${
-            result.method === "EMAIL" ? "email" : "authenticator"
-          } code`,
-          color: "blue",
-        });
+        notificationMessages.twoFactorRequired(result.method);
         router.push("/otp");
       } else {
-        notifications.show({
-          title: "Success",
-          message: "Logged in successfully",
-          color: "green",
-        });
+        notificationMessages.loginSuccess();
         router.push("/dashboard");
       }
     } catch (error: any) {
-      notifications.show({
-        title: "Login Failed",
-        message: error.message || "Invalid credentials",
-        color: "red",
-      });
+      notificationMessages.loginFailed(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container size={420} py={40}>
+    <>
       <Header />
-
-      <Stack align="center" mb="xl">
-        <div style={{ textAlign: "center" }}>
-          <Title size="h2" fw={700} c="blue">
-            Welcome Back
-          </Title>
-          <Text c="dimmed" mt={4}>
-            Sign in to your secure account
-          </Text>
-        </div>
-      </Stack>
-
-      <Paper
-        shadow="lg"
-        p={40}
-        radius="lg"
-        style={{
-          background: "var(--mantine-color-default)",
-          border: "1px solid var(--mantine-color-default-border)",
-        }}
+      <AuthFormContainer
+        title="Welcome Back"
+        subtitle="Sign in to your secure account"
       >
         <form onSubmit={handleSubmit}>
           <Stack gap="lg">
@@ -144,7 +103,7 @@ export default function LoginPage() {
             </Anchor>
           </Text>
         </Group>
-      </Paper>
-    </Container>
+      </AuthFormContainer>
+    </>
   );
 }

@@ -3,9 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Container,
-  Paper,
-  Title,
   TextInput,
   PasswordInput,
   Button,
@@ -15,14 +12,15 @@ import {
   Group,
   ThemeIcon,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { Header } from "@/components/Header";
+import { AuthFormContainer } from "@/components/AuthFormContainer";
+import { showNotification, notificationMessages } from "@/lib/notifications";
+import { validatePassword, validatePasswordMatch } from "@/lib/hooks";
 import {
   IconUserPlus,
   IconMail,
   IconLock,
   IconUser,
-  IconLogin,
 } from "@tabler/icons-react";
 
 export default function RegisterPage() {
@@ -37,22 +35,16 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
 
-    if (password !== confirmPassword) {
-      notifications.show({
-        title: "Error",
-        message: "Passwords do not match",
-        color: "red",
-      });
+    const passwordMatchError = validatePasswordMatch(password, confirmPassword);
+    if (passwordMatchError) {
+      showNotification("Error", passwordMatchError, "error");
       setLoading(false);
       return;
     }
 
-    if (password.length < 6) {
-      notifications.show({
-        title: "Error",
-        message: "Password must be at least 6 characters",
-        color: "red",
-      });
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      showNotification("Error", passwordError, "error");
       setLoading(false);
       return;
     }
@@ -69,57 +61,32 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        notifications.show({
-          title: "Success",
-          message: "Account created successfully! Please log in.",
-          color: "green",
-        });
+        notificationMessages.registrationSuccess();
         router.push("/login");
       } else {
-        notifications.show({
-          title: "Registration Failed",
-          message: data.error || "Registration failed",
-          color: "red",
-        });
+        notificationMessages.registrationFailed(data.error);
       }
-    } catch (err) {
-      notifications.show({
-        title: "Error",
-        message: "Network error. Please try again.",
-        color: "red",
-      });
+    } catch {
+      notificationMessages.networkError();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container size={480} py={40}>
+    <>
       <Header />
-
-      <Stack align="center" mb="xl">
-        <ThemeIcon size="xl" radius="xl" variant="light" color="green">
-          <IconUserPlus size={28} />
-        </ThemeIcon>
-        <div style={{ textAlign: "center" }}>
-          <Title size="h2" fw={700} c="green">
-            Create Account
-          </Title>
-          <Text c="dimmed" mt={4}>
-            Join us and secure your account
-          </Text>
-        </div>
-      </Stack>
-
-      <Paper
-        shadow="lg"
-        p={40}
-        radius="lg"
-        style={{
-          background: "var(--mantine-color-default)",
-          border: "1px solid var(--mantine-color-default-border)",
-        }}
+      <AuthFormContainer
+        title="Create Account"
+        subtitle="Join us and secure your account"
+        size={480}
       >
+        <Stack align="center" mb="lg">
+          <ThemeIcon size="xl" radius="xl" variant="light" color="green">
+            <IconUserPlus size={28} />
+          </ThemeIcon>
+        </Stack>
+
         <form onSubmit={handleSubmit}>
           <Stack gap="lg">
             <TextInput
@@ -188,7 +155,7 @@ export default function RegisterPage() {
             </Anchor>
           </Text>
         </Group>
-      </Paper>
-    </Container>
+      </AuthFormContainer>
+    </>
   );
 }
