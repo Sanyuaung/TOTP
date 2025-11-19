@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  twoFactorAuth TwoFactorAuth?
+}
+
+model TwoFactorAuth {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  isEnabled        Boolean  @default(false)
+  method           TwoFactorMethod @default(EMAIL)
+
+  // For Google Authenticator
+  secret           String?
+  backupCodes      String[]
+
+  // For Email OTP
+  emailOtp         String?
+  emailOtpExpiry   DateTime?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+enum TwoFactorMethod {
+  EMAIL
+  GOOGLE_AUTH
+}
