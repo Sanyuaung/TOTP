@@ -15,33 +15,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Validate the email with Abstractapi
-    const apiKey = process.env.ABSTRACTAPI_KEY;
-    const url = `https://emailreputation.abstractapi.com/v1/?api_key=${apiKey}&email=${email}`;
+    // 1. Validate the email with Gamalogic
+    const apiKey = process.env.GAMALOGIC_API_KEY;
+    const url = "https://gamalogic.com/emailvrf";
+    const params = {
+      emailid: email,
+      apikey: apiKey,
+      speed_rank: 0, // optional
+    };
 
-    const validationRes = await axios.get(url);
+    const validationRes = await axios.get(url, { params });
     const validationData = validationRes.data;
+    // The API returns an object like { gamalogic_emailid_vrfy: [ { ... } ] }
+    const result = validationData.gamalogic_emailid_vrfy?.[0];
 
-    // Check email format validity
-    if (!validationData.email_deliverability?.is_format_valid) {
+    if (!result) {
       return NextResponse.json(
-        { error: "Email format is invalid" },
+        { error: "Could not validate email" },
         { status: 400 }
       );
     }
 
-    // Check if email is deliverable
-    if (validationData.email_deliverability?.status !== "deliverable") {
+    // Check the validation properties
+    if (!result.is_syntax_valid) {
       return NextResponse.json(
-        { error: "Email is not valid or not deliverable" },
+        { error: "Email syntax is invalid" },
         { status: 400 }
       );
     }
-
-    // Check if email is disposable
-    if (validationData.email_quality?.is_disposable) {
+    if (result.is_disposable) {
       return NextResponse.json(
         { error: "Disposable / temporary email is not allowed" },
+        { status: 400 }
+      );
+    }
+    if (!result.is_valid) {
+      // This means Gamalogic thinks it's not a valid deliverable email
+      return NextResponse.json(
+        { error: "Email is not valid or not deliverable" },
         { status: 400 }
       );
     }
