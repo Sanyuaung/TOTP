@@ -67,6 +67,7 @@ Welcome to the **TOTP Authentication System** - a production-ready authenticatio
 
 #### Security Features
 
+- ✅ **Email Validation** - Real-time email verification with Abstractapi
 - ✅ **Input Validation** - Comprehensive form validation
 - ✅ **SQL Injection Prevention** - Parameterized queries with Prisma
 - ✅ **XSS Protection** - Sanitized user inputs and secure cookies
@@ -156,6 +157,7 @@ Welcome to the **TOTP Authentication System** - a production-ready authenticatio
 ![bcryptjs](https://img.shields.io/badge/bcryptjs-3.0+-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Speakeasy](https://img.shields.io/badge/Speakeasy-2.0+-FF6B35?style=for-the-badge)
 ![Nodemailer](https://img.shields.io/badge/Nodemailer-7.0+-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Abstractapi](https://img.shields.io/badge/Abstractapi-Email-4285F4?style=for-the-badge)
 ![QRCode](https://img.shields.io/badge/QRCode-1.5+-000000?style=for-the-badge)
 ![Tabler Icons](https://img.shields.io/badge/Tabler_Icons-3.35+-0066CC?style=for-the-badge)
 
@@ -316,6 +318,9 @@ Before you begin, ensure you have the following installed:
    EMAIL_USER="your-email@gmail.com"
    EMAIL_PASSWORD="your-app-password"
    EMAIL_FROM="your-email@gmail.com"
+
+   # Abstractapi Email Validation
+   ABSTRACTAPI_KEY="your-abstractapi-key-here"
    ```
 
 4. **Database Setup**
@@ -441,44 +446,6 @@ Login → JWT Token → HTTP-Only Cookie → API Requests → Automatic Refresh 
 
 ---
 
-## 🎨 UI Components Showcase
-
-### 📱 Pages Overview
-
-<div align="center">
-
-#### 🏠 Dashboard Page
-
-![Dashboard Preview](https://via.placeholder.com/800x400/4CAF50/FFFFFF?text=Dashboard+Preview)
-
-#### 🔐 Login Page
-
-![Login Preview](https://via.placeholder.com/800x400/2196F3/FFFFFF?text=Login+Preview)
-
-#### 📝 Registration Page
-
-![Register Preview](https://via.placeholder.com/800x400/FF9800/FFFFFF?text=Register+Preview)
-
-#### 🔢 OTP Verification Page
-
-![OTP Preview](https://via.placeholder.com/800x400/9C27B0/FFFFFF?text=OTP+Preview)
-
-#### 👤 Profile Management
-
-![Profile Preview](https://via.placeholder.com/800x400/607D8B/FFFFFF?text=Profile+Preview)
-
-</div>
-
-### 🎯 Key UI Features
-
-- **🌈 Gradient Backgrounds** - Modern visual appeal
-- **📱 Responsive Design** - Works on all screen sizes
-- **⚡ Smooth Animations** - Enhanced user experience
-- **🎨 Consistent Theming** - Unified design language
-- **♿ Accessibility** - WCAG compliant components
-
----
-
 ## 🧪 Testing & Quality Assurance
 
 ### ✅ Testing Checklist
@@ -554,6 +521,9 @@ EMAIL_PORT=587
 EMAIL_USER="noreply@yourdomain.com"
 EMAIL_PASSWORD="production-email-password"
 EMAIL_FROM="noreply@yourdomain.com"
+
+# Abstractapi Email Validation
+ABSTRACTAPI_KEY="your-abstractapi-key-here"
 ```
 
 #### Build & Deploy
